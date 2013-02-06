@@ -1,8 +1,8 @@
 // Context Variables
 var canvasBg = document.getElementById('canvasBg')
 var ctxBG = canvasBg.getContext('2d');
-var ctxGeek = document.getElementById('geek')
-var ctxGeek.getContext('2d');  
+var geek = document.getElementById('geek');
+var ctxGeek = geek.getContext('2d');  
 var ctxSquirrel = document.getElementById('obstacle').getContext('2d');
 var ctxScore = document.getElementById('score').getContext('2d'); 
 var ctxLives = document.getElementById('lives').getContext('2d'); 
@@ -21,7 +21,7 @@ var gameHeight = canvasBg.height;
 var scoreLimit = 100; // or var backgroundCounter;  
 //var startButton = ; 
 var obstacleAmount = 1;
-var obstacles []; 
+var obstacles = []; 
 var isPlaying = false; 
 //request Animation Frame
 //var requestAnimFrame = ; 

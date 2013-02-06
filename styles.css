@@ -1,7 +1,10 @@
 #canvas{
 	display: block;
 }
-
+#canvasBg{
+	background-color: gray;
+}
 #geek, #obstacle, #score, #lives{
-	margin: -500px 0 0 ;
+	margin: -320px 0 0 ;
+	color: black;
 }
