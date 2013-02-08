@@ -1,6 +1,6 @@
 // Context Variables
 var canvasBg = document.getElementById('canvasBg')
-var ctxBG = canvasBg.getContext('2d');
+var ctxBG = canvasBg.getContext('2d');git
 var geek = document.getElementById('geek');
 var ctxGeek = geek.getContext('2d');  
 var ctxSquirrel = document.getElementById('obstacle').getContext('2d');
