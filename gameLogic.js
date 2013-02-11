@@ -118,14 +118,16 @@ Geek.prototype.draw = function(){
 };
 
 Geek.prototype.checkKeys = function(){
+ 	/*
  	if(this.isSpaceBar){
  		setInterval(function(){geek1.jump()}, 100);
  		setTimeout(function(){ window.clearInterval(int); }, 1000);
- 	}
+ 	}*/
+ 	
  	if(this.isLeftKey){
  		this.srcX = 0; 
  		this.srcY = 392; //-1
- 		this.drawX -= this.speed; // +
+ 		this.drawX += this.speed; // + for hurdling effect
  	
  	}
  	if(this.isRightKey){
@@ -133,6 +135,18 @@ Geek.prototype.checkKeys = function(){
  		this.srcY = 320;
  		this.drawX += this.speed;
  	
+ 	}
+ 	if(this.isUpKey){
+ 		if(this.drawY > this.jumpLimit){
+ 			this.drawY -= this.speed; 
+ 			this.srcX = 0;
+	 		this.srcY = 463;
+ 		}
+ 	}
+ 	if(this.isDownKey){
+ 		if(this.drawY < 240){
+ 			this.drawY += this.speed; 
+ 		}
  	}
 };
 
@@ -251,6 +265,14 @@ function checkKeyDown(e){
 		geek1.isRightKey = true; 
 		e.preventDefault(); 
 	}
+	if(keyID === 38 || keyID === 87){//left
+		geek1.isUpKey = true; 
+		e.preventDefault(); 
+	}
+	if(keyID === 40 || keyID === 83){//right
+		geek1.isDownKey = true; 
+		e.preventDefault(); 
+	}
 }
 
 function checkKeyUp (e){
@@ -268,7 +290,16 @@ function checkKeyUp (e){
 		geek1.isRightKey = false; 
 		e.preventDefault(); 
 	}
+	if(keyID === 38 || keyID === 87){//left
+		geek1.isUpKey = false; 
+		e.preventDefault(); 
+	}
+	if(keyID === 40 || keyID === 83){//right
+		geek1.isDownKey = false; 
+		e.preventDefault(); 
+	}
 }
+
 
 /**********************************************
 			END OF EVENT FUNCTIONS
