@@ -1,161 +1,198 @@
-// Context Variables
-var canvasBg = document.getElementById('canvasBg')
-var ctxBG = canvasBg.getContext('2d');git
+/**********************************************
+			GLOBAL VARIABLES
+**********************************************/
+
+var canvas_Bg = document.getElementById('canvas_Bg');
+var ctx_Bg = canvas_Bg.getContext('2d'); 
 var geek = document.getElementById('geek');
-var ctxGeek = geek.getContext('2d');  
-var ctxSquirrel = document.getElementById('obstacle').getContext('2d');
-var ctxScore = document.getElementById('score').getContext('2d'); 
-var ctxLives = document.getElementById('lives').getContext('2d'); 
+var ctx_geek = geek.getContext('2d'); 
+var obstacle = document.getElementById('obstacle');
+var ctx_obstacle = obstacle.getContext('2d'); 
+var bowtie = document.getElementById('bowtie');
+var ctx_bowtie = bowtie.getContext('2d'); 
+var lives = document.getElementById('lives');
+var ctx_lives = lives.getContext('2d'); 
+var score = document.getElementById('score');
+var ctx_score = score.getContext('2d'); 
 
-/*	HUD 
-ctxScore.fillStyle =  ;
-ctxScore.font = ;   
-ctxLives.fillStyle = ; 
-ctxLives.fillSytle = ; 
-*/
+var gameWidth = canvas_Bg.width;
+var gameHeight = canvas_Bg.height; 
 
-
-//Global Variables
-var gameWidth = canvasBg.width;
-var gameHeight = canvasBg.height;
-var bgDrawX1 = 0;
-var bgDrawX2 = 930;
-//Geek boundaries
-
-var topBoundary = ;
-var bottomBounday =; 
-
-var scoreLimit = 100; // or var backgroundCounter;  
-//var startButton = ; 
-var obstacleAmount = 1;
-var obstacles = []; 
-var isPlaying = false; 
-
-/******************************************/
-//request Animation Frame
-//var requestAnimFrame = ; 
+var fps = 10; 
+var drawInterval; 
 
 
-//Sprite 
-//930x320
-//133x108
+
+//Sprite
 var imgSprite = new Image();
-imgSprite.src ='sprite.jpg';  
-imgSprite.addEventListener('load', init, false);
+imgSprite.src = 'gameImg/sprite1.png';
+imgSprite.addEventListener('load',init,false);
+
+var obstacle1;
+var geek1; 
+
+/**********************************************
+			END OF GLOBAL VARIABLES
+**********************************************/
 
 
 
-//Main Functions 
-function init(){
-	playGame();
-	//drawMenu Function
-	//spawn obstacles
-} 
 
-function playGame(){
+/**********************************************
+				MAIN FUNCTIONS
+**********************************************/
+function init() {
+	geek1 = new Geek();
+	obstacle1 = new Obstacle();
+	startDrawing();
+	//event listeners for keys
+	document.addEventListener('keydown',checkKeyDown,false);
+	document.addEventListener('keyup',checkKeyUp,false);
+
+}
+
+function draw(){
 	drawBg();
-	//startLoop
-	//updateHUD	
+	geek1.draw();
+	obstacle1.draw();
 }
 
-function spawnObstacles(obstacleAmount){
-	for (var i = 0; i < obstacles.length; i++) {
-		obstacles[obstacles.length].draw(); 
-	}
+function startDrawing(){
+	stopDrawing();
+	drawInterval = setInterval(draw,fps); 
 }
 
-function drawAllObstacles(){
-	//clear ctx obstacle 
-	for (var i = 0 ; i < obstacles.length; i++) {
-		obstacles[i].draw();
-	}
+function stopDrawing(){
+	clearInterval(drawInterval);
 }
 
-function loop(){
-
-}
-
-function dragBg(){
-	ctxBg.clearRect(0,0,gameWidth,gameHeight);
-	ctxBg.drawImage(imgSprite, 0, 0,930, gameHeight,bgDrawX1,0,930, gameHeight);
-	ctxBg.drawImage(imgSprite, 0, 0,930, gameWidth,bgDrawX2,0,930, gameWidth);
-
+// Before scrolling
+function drawBg(){
+	var srcX = 0; 
+	var srcY = 0; 
+	var drawX = 0;
+	var drawY = 0; 
+	ctx_Bg.drawImage(imgSprite,srcX,srcY,gameWidth,gameHeight,drawX,drawY,gameWidth,gameHeight);
 }
 
 
-//Geek Functions
+function clear_ctx_Bg(){
+	ctx_Bg.clearRect(0,0,gameWidth,gameHeight); 
+}
+/**********************************************
+			END OF MAIN FUNCTIONS
+**********************************************/
 
+
+
+
+
+/**********************************************
+			GEEK FUNCTIONS
+**********************************************/
 function Geek(){
-
-	this.srcX = ; 
-	this.srcY = ; 
-	this.width = ; 
-	this.height = ;
-	//pixels each movement 
-	this.speed = ; 
-	//initial draw 
-	this.drawX = ; 
-	this.drawY = ; 
-
-	//hitbox
-	this.leftX = this.drawX;
-	this.rightX = this.drawX + this.width;
-	this.topY = this.drawY;
-	this.bottomY = this.drawY + this.height;
-
-	//movement
+	this.srcX = 0; 
+	this.srcY = 320; 
+	this.width = 65; 
+	this.height = 70;
+	this.speed = 3; //3 pixels every draw cycle 
+	this.drawX = 150;
+	this.drawY = 240; 
+	this.isSpaceBar = false;
 	this.isLeftKey = false;
-	this.isRightKey = false; 
-	this.isSpaceBar = false; 
-	this.isJumping = false; 
+	this.isRightKey = false;
+	this.jumpLimit = this.drawY - 40;
 
-	//HUD 
-	this.score = false; 
-	this.lives = 1; 
 
 }
 
+Geek.prototype.draw = function(){
+ 	clear_ctx_geek();
+ 	this.checkKeys();
+ 	ctx_geek.drawImage(imgSprite,this.srcX,this.srcY,this.width,this.height,this.drawX,this.drawY,this.width,this.height);
+};
 
- Geek.prototype.draw = function() {
- 	clearCtxGeek(); 
- 	this.updateCoors();
- 	this.checkDirection(); 
- 	this.checkJumping(); 
- 	ctxGeek.drawImage(imgSprite,this.srcX,this.srcY,this.width,this.height,this.drawX,this.drawY,this.width,this.height);
- };
+Geek.prototype.checkKeys = function(){
+ 	if(this.isSpaceBar){
+ 		for(var i = this.drawY; i >= this.jumpLimit; i--){
+ 			this.drawY = this.drawY - 0.09;
+ 			this.srcX = 0;
+ 			this.srcY = 463;//-1
+ 		}
+ 		
+ 	}
+ 	if(this.isLeftKey){
+ 		this.srcX = 0; 
+ 		this.srcY = 392; //-1
+ 		this.drawX += this.speed; // +
+ 	
+ 	}
+ 	if(this.isRightKey){
+ 		this.srcX = 0;
+ 		this.srcY = 320;
+ 		this.drawX += this.speed;
+ 	
+ 	}
+};
 
-Geek.prototype.updateCoors = function(){ 
-	//hit box resets position here
-	this.leftX = this.drawX;
-	this.rightX = this.drawX + this.width;
-	this.topY = this.drawY;
-	this.bottomY = this.drawY + this.height;
-
-}
- 
-Geek.prototype.checkDirection = function(){
-
-}
-
-Geek.prototype.checkJump = function(){
-	//spacebar will be jump
-	if(this.isSpaceBar = true && !this.isJumping){
-		// have to move hitbox and Geek 
-		// jump straight up then return to bottom y boundary.
-
-		this.isJumping = true; 
-	}else if (!this.isSpaceBar){
-		this.isJumping = false; 
-	}
-}
-
-function clearCtxGeek(){
-	ctxGeek.clearRect(0,0,gameWidth,gameHeight);
+function clear_ctx_geek(){
+	ctx_geek.clearRect(0,0,gameWidth,gameHeight); 
 }
 
+/**********************************************
+			END OF GEEK FUNCTIONS
+**********************************************/
 
 
-//Check controls functions 
+
+
+
+/**********************************************
+			OBSTACLE FUNCTIONS
+**********************************************/
+
+function Obstacle(){
+	this.srcX = 0; 
+	this.srcY = 548; 
+	this.width = 40; 
+	this.height = 30;
+	this.speed = 3; //3 pixels every draw cycle 
+	this.drawX = 650;
+	this.drawY = 280; 
+
+}
+
+Obstacle.prototype.draw = function(){
+	clear_ctx_obstacle();
+ 	ctx_obstacle.drawImage(imgSprite,this.srcX,this.srcY,this.width,this.height,this.drawX,this.drawY,this.width,this.height);
+};
+
+function clear_ctx_obstacle(){
+	ctx_obstacle.clearRect(0,0,gameWidth,gameHeight);
+};
+
+/**********************************************
+			END OF OBSTACLE FUNCTIONS
+**********************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**********************************************
+			EVENT FUNCTIONS
+**********************************************/
 
 function checkKeyDown(e){
 	var keyID = e.keyCode || e.which;
@@ -191,7 +228,9 @@ function checkKeyUp (e){
 	}
 }
 
-
+/**********************************************
+			END OF EVENT FUNCTIONS
+**********************************************/
 
 
 
