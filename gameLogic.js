@@ -20,6 +20,9 @@ var gameHeight = canvas_Bg.height;
 
 var fps = 10; 
 var drawInterval; 
+var obstacle_amount = 3; 
+
+var y_limit = 200; 
 
 
 
@@ -28,7 +31,7 @@ var imgSprite = new Image();
 imgSprite.src = 'gameImg/sprite1.png';
 imgSprite.addEventListener('load',init,false);
 
-var obstacle1;
+var obstacles = []; 
 var geek1; 
 
 /**********************************************
@@ -43,7 +46,7 @@ var geek1;
 **********************************************/
 function init() {
 	geek1 = new Geek();
-	obstacle1 = new Obstacle();
+	spawnObstacles(obstacle_amount);
 	startDrawing();
 	//event listeners for keys
 	document.addEventListener('keydown',checkKeyDown,false);
@@ -54,7 +57,8 @@ function init() {
 function draw(){
 	drawBg();
 	geek1.draw();
-	obstacle1.draw();
+	drawAllObstacles(); 
+	//spawn obstacle 
 }
 
 function startDrawing(){
@@ -79,6 +83,7 @@ function drawBg(){
 function clear_ctx_Bg(){
 	ctx_Bg.clearRect(0,0,gameWidth,gameHeight); 
 }
+
 /**********************************************
 			END OF MAIN FUNCTIONS
 **********************************************/
@@ -114,17 +119,13 @@ Geek.prototype.draw = function(){
 
 Geek.prototype.checkKeys = function(){
  	if(this.isSpaceBar){
- 		for(var i = this.drawY; i >= this.jumpLimit; i--){
- 			this.drawY = this.drawY - 0.09;
- 			this.srcX = 0;
- 			this.srcY = 463;//-1
- 		}
- 		
+ 		setInterval(function(){geek1.jump()}, 100);
+ 		setTimeout(function(){ window.clearInterval(int); }, 1000);
  	}
  	if(this.isLeftKey){
  		this.srcX = 0; 
  		this.srcY = 392; //-1
- 		this.drawX += this.speed; // +
+ 		this.drawX -= this.speed; // +
  	
  	}
  	if(this.isRightKey){
@@ -133,6 +134,21 @@ Geek.prototype.checkKeys = function(){
  		this.drawX += this.speed;
  	
  	}
+};
+
+Geek.prototype.jump = function() {
+	console.log('jump limit: ' + this.jumpLimit );
+
+	if(this.drawY > this.jumpLimit ) {
+		this.drawY = this.drawY - 1;
+ 		this.srcX = 0;
+ 		this.srcY = 463;
+
+ 		console.log('drawY: ' + this.drawY );
+
+	} else {
+		console.log('clear int');
+	}
 };
 
 function clear_ctx_geek(){
@@ -156,20 +172,46 @@ function Obstacle(){
 	this.srcY = 548; 
 	this.width = 40; 
 	this.height = 30;
-	this.speed = 3; //3 pixels every draw cycle 
-	this.drawX = 650;
+	this.speed = 2; //3 pixels every draw cycle 
+	this.drawX = Math.floor(Math.random() * 1000) + gameWidth;
 	this.drawY = 280; 
 
 }
 
 Obstacle.prototype.draw = function(){
-	clear_ctx_obstacle();
+	this.drawX -= this.speed;
  	ctx_obstacle.drawImage(imgSprite,this.srcX,this.srcY,this.width,this.height,this.drawX,this.drawY,this.width,this.height);
+ 	this.checkEscaped(); 
 };
+
+Obstacle.prototype.checkEscaped = function(){
+	if(this.drawX + this.width <= 0 ){
+		this.recycleObstacle();
+	}
+}
+
+Obstacle.prototype.recycleObstacle = function(){
+	this.drawX = Math.floor(Math.random()*1000) + gameWidth;
+	this.drawY = 280; //this.drawY should matchup
+}
 
 function clear_ctx_obstacle(){
 	ctx_obstacle.clearRect(0,0,gameWidth,gameHeight);
 };
+
+function spawnObstacles(number){
+	for(var i = 0; i < number; i ++){
+		obstacles[i] = new Obstacle();
+	}
+}
+
+function drawAllObstacles(){
+	clear_ctx_obstacle(); 
+	for(var i = 0; i < obstacles.length; i++){
+		obstacles[i].draw();
+	}
+}
+
 
 /**********************************************
 			END OF OBSTACLE FUNCTIONS
