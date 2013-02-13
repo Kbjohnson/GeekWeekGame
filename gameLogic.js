@@ -61,6 +61,7 @@ function init() {
 }
 
 function loop(){
+
 	if(isPlaying){
 		drawBg();
 		geek1.draw();
@@ -69,7 +70,7 @@ function loop(){
 		drawAllObstacles(); 
 		drawAllBowties();
 		requestAnimFrame(loop);
-	//spawn obstacle 
+	
 	}
 }
 
@@ -114,7 +115,24 @@ function clear_ctx_Bg(){
 			HIT DETECTION FUNCTIONS
 **********************************************/
 
-//take two objects 
+		//checkHit function
+		//object is the bowtie or the obstacle, geek, and form is if the geek is knight form or geek form
+function checkHit(object,geek){
+	if((object.leftX <= geek.rightX &&
+	   object.leftX >= geek.leftX &&
+	   object.topY >= geek.topY &&
+	   object.topY <= geek.bottomY )||
+	  (object.rightX <= geek.rightX &&
+	   object.rightX >= geek.leftX &&
+	   object.topY >= geek.topY &&
+	   object.topY <= geek.bottomY)){
+	  	console.log('HIT!');
+	  	object.isHit = true; 
+	  	return object.isHit;
+	}
+		return object.isHit = false;
+}
+
 function updateScore(){
 	ctx_score.clearRect(0,0,gameWidth,gameHeight); 
 	ctx_score.fillText('Score: ' + geek1.score, 825, 35); // change this to be in the middle of a div
@@ -153,14 +171,13 @@ function Geek(){
 	this.topY = this.drawY;
 	this.bottomY = this.drawY + this.height;
 
-	this.hasHit = false; 
+
 
 
 }
 
 Geek.prototype.draw = function(){
  	clear_ctx_geek();
- 	this.checkHit();
  	this.updateCoors();
  	this.checkKeys();
  	ctx_geek.drawImage(
@@ -191,7 +208,7 @@ Geek.prototype.checkKeys = function(){
  		setTimeout(function(){ window.clearInterval(int); }, 1000);
  	}*/
  	
- 	if(this.isLeftKey && this.leftX > 0){
+ 	if(this.isLeftKey && this.leftX > 0){//this.rightX < gameWidth
  		this.srcX = 0; 
  		this.srcY = 392; //-1
  		this.drawX -= this.speed; // + for hurdling effect
@@ -208,7 +225,6 @@ Geek.prototype.checkKeys = function(){
  			this.drawY -= this.speed; 
  			this.srcX = 0;
 	 		this.srcY = 463;
-	 		this.score += 10;
  		}
  	}
  	if(this.isDownKey && this.bottomY < gameHeight){
@@ -233,18 +249,7 @@ Geek.prototype.jump = function() {
 	}
 };
 
-Geek.prototype.checkHit = function(){
-	for(var i = 0; i < obstacles.length; i++){
-		if(this.drawX + this.height >= obstacles[i].drawX &&
-		   this.drawX + this.height <= obstacles[i].drawX + obstacles[i].width &&
-		   this.drawY + this.width >= obstacles[i].drawY &&
-		   this.drawY+ this.width <= obstacles[i] + obstacles[i].height){
-		   		this.hasHit = true; 
-			   	console.log('HIT!');
-				//call -1 life if not in knight form
-		}
-	}
-}
+
 
 function clear_ctx_geek(){
 	ctx_geek.clearRect(0,0,gameWidth,gameHeight); 
@@ -253,8 +258,6 @@ function clear_ctx_geek(){
 /**********************************************
 			END OF GEEK FUNCTIONS
 **********************************************/
-
-
 
 
 
@@ -271,7 +274,15 @@ function Obstacle(){
 	this.drawX = Math.floor(Math.random() * 1000) + gameWidth;
 	this.drawY = 280; 
 
+	//hitbox coordinates
+	this.isHit = false;  
+	this.leftX = this.drawX;
+	this.rightX = this.drawX + this.width;
+	this.topY = this.drawY;
+	this.bottomY = this.drawY + this.height;
+
 }
+
 
 Obstacle.prototype.draw = function(){
 	this.drawX -= this.speed;
@@ -299,6 +310,14 @@ Obstacle.prototype.recycleObstacle = function(){
 	this.drawY = 280; //this.drawY should matchup
 }
 
+Obstacle.prototype.updateCoors = function(){
+	this.leftX = this.drawX;
+	this.rightX = this.drawX + this.width;
+	this.topY = this.drawY;
+	this.bottomY = this.drawY + this.height;
+}
+
+
 function clear_ctx_obstacle(){
 	ctx_obstacle.clearRect(0,0,gameWidth,gameHeight);
 };
@@ -312,6 +331,8 @@ function spawnObstacles(number){
 function drawAllObstacles(){
 	clear_ctx_obstacle(); 
 	for(var i = 0; i < obstacles.length; i++){
+		obstacles[i].updateCoors();
+		checkHit(obstacles[i],geek1);
 		obstacles[i].draw();
 
 	}
@@ -337,7 +358,15 @@ function Bowtie(){
 										//range of tightness	
 	this.drawY = (Math.floor(Math.random()*10) + 1) + 200;  
 												// 
-	this.speed = 1;
+
+
+	//hitbox coordinates 
+	this.isHit = false;
+	this.leftX = this.drawX;
+	this.rightX = this.drawX + this.width;
+	this.topY = this.drawY;
+	this.bottomY = this.drawY + this.height;
+
 
 }
 
@@ -355,6 +384,17 @@ Bowtie.prototype.draw = function(){
  	
 };
 
+Bowtie.prototype.updateCoors = function(){
+	this.leftX = this.drawX;
+	this.rightX = this.drawX + this.width;
+	this.topY = this.drawY;
+	this.bottomY = this.drawY + this.height;
+}
+
+Bowtie.prototype.hitAction = function(){
+	geek1.score += 10;
+
+}
 
 function clear_ctx_bowtie(){
 	ctx_bowtie.clearRect(0,0,gameWidth,gameHeight);
@@ -369,6 +409,10 @@ function spawnBowties(number){
 function drawAllBowties(){
 	clear_ctx_bowtie(); 
 	for(var i = 0; i < bowties.length; i++){
+		checkHit(bowties[i],geek1);
+		if(bowties[i].isHit){
+			bowties[i].hitAction();
+		}
 		bowties[i].draw();
 	}
 }
@@ -378,26 +422,6 @@ function drawAllBowties(){
 			END OF BOWTIE FUNCTIONS
 **********************************************/
 
-
-
-
-/**********************************************
-			HIT DETECTION FUNCTIONS
-**********************************************/
-
-function Poof(){
-
-}
-
-//take two objects 
-function detectHit(object1, object2){
-	//
-	
-	return true;
-}
-/**********************************************
-			END HIT DETECTION FUNCTIONS
-**********************************************/
 
 
 
