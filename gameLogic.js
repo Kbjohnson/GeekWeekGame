@@ -18,8 +18,13 @@ var ctx_score = score.getContext('2d');
 var gameWidth = canvas_Bg.width;
 var gameHeight = canvas_Bg.height; 
 
-var fps = 10; 
-var drawInterval; 
+//request animation frame
+var isPlaying = 'false'; 		//request Animation Frame in the browser
+var requestAnimFrame = window.requestAnimationFrame ||
+					   window.webkitRequestAnimationFrame ||
+					   window.mozRequestAnimationFrame ||
+					   window.msRequestAnimationFrame ||
+					   window.oRequestAnimationFrame;
 
 var y_limit = 200; 
 
@@ -48,30 +53,33 @@ function init() {
 	geek1 = new Geek();
 	spawnObstacles(obstacle_amount);
 	spawnBowties(bowtie_amount); 
-	startDrawing();
+	startLoop();
 	//event listeners for keys
 	document.addEventListener('keydown',checkKeyDown,false);
 	document.addEventListener('keyup',checkKeyUp,false);
 
 }
 
-function draw(){
-	drawBg();
-	geek1.draw();
-	updateScore();
-	updateLives();
-	drawAllObstacles(); 
-	drawAllBowties();
+function loop(){
+	if(isPlaying){
+		drawBg();
+		geek1.draw();
+		updateScore();
+		updateLives();
+		drawAllObstacles(); 
+		drawAllBowties();
+		requestAnimFrame(loop);
 	//spawn obstacle 
+	}
 }
 
-function startDrawing(){
-	stopDrawing();
-	drawInterval = setInterval(draw,fps); 
+function startLoop(){
+	isPlaying = true;
+	loop();
 }
 
-function stopDrawing(){
-	clearInterval(drawInterval);
+function stopLoop(){
+	isPlaying = false;
 }
 
 // Before scrolling
@@ -145,11 +153,15 @@ function Geek(){
 	this.topY = this.drawY;
 	this.bottomY = this.drawY + this.height;
 
+	this.hasHit = false; 
+
 
 }
 
 Geek.prototype.draw = function(){
  	clear_ctx_geek();
+ 	this.checkHit();
+ 	this.updateCoors();
  	this.checkKeys();
  	ctx_geek.drawImage(
  		imgSprite,
@@ -161,7 +173,16 @@ Geek.prototype.draw = function(){
  		this.drawY,
  		this.width,
  		this.height);
+
 };
+
+Geek.prototype.updateCoors = function(){
+	this.leftX = this.drawX;
+	this.rightX = this.drawX + this.width;
+	this.topY = this.drawY;
+	this.bottomY = this.drawY + this.height;
+
+}
 
 Geek.prototype.checkKeys = function(){
  	/*
@@ -211,6 +232,19 @@ Geek.prototype.jump = function() {
 		console.log('clear int');
 	}
 };
+
+Geek.prototype.checkHit = function(){
+	for(var i = 0; i < obstacles.length; i++){
+		if(this.drawX + this.height >= obstacles[i].drawX &&
+		   this.drawX + this.height <= obstacles[i].drawX + obstacles[i].width &&
+		   this.drawY + this.width >= obstacles[i].drawY &&
+		   this.drawY+ this.width <= obstacles[i] + obstacles[i].height){
+		   		this.hasHit = true; 
+			   	console.log('HIT!');
+				//call -1 life if not in knight form
+		}
+	}
+}
 
 function clear_ctx_geek(){
 	ctx_geek.clearRect(0,0,gameWidth,gameHeight); 
@@ -279,6 +313,7 @@ function drawAllObstacles(){
 	clear_ctx_obstacle(); 
 	for(var i = 0; i < obstacles.length; i++){
 		obstacles[i].draw();
+
 	}
 }
 
@@ -349,6 +384,10 @@ function drawAllBowties(){
 /**********************************************
 			HIT DETECTION FUNCTIONS
 **********************************************/
+
+function Poof(){
+
+}
 
 //take two objects 
 function detectHit(object1, object2){
