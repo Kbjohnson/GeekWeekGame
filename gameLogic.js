@@ -14,6 +14,7 @@ var lives = document.getElementById('lives');
 var ctx_lives = lives.getContext('2d'); 
 var score = document.getElementById('score');
 var ctx_score = score.getContext('2d'); 
+ 
 
 var gameWidth = canvas_Bg.width;
 var gameHeight = canvas_Bg.height; 
@@ -38,6 +39,7 @@ var bowties = [];
 var obstacle_amount = 3;
 var bowtie_amount = 3; 
 var geek1; 
+var poof1 = new Poof(); 
 
 /**********************************************
 			END OF GLOBAL VARIABLES
@@ -68,6 +70,7 @@ function loop(){
 		updateScore();
 		updateLives();
 		drawAllObstacles(); 
+		poof1.draw();
 		drawAllBowties();
 		requestAnimFrame(loop);
 	
@@ -118,6 +121,7 @@ function clear_ctx_Bg(){
 		//checkHit function
 		//object is the bowtie or the obstacle, geek, and form is if the geek is knight form or geek form
 function checkHit(object,geek){
+	if(geek1.hasHit == false){
 	if((object.leftX <= geek.rightX &&
 	   object.leftX >= geek.leftX &&
 	   object.topY >= geek.topY &&
@@ -127,10 +131,11 @@ function checkHit(object,geek){
 	   object.topY >= geek.topY &&
 	   object.topY <= geek.bottomY)){
 	  	console.log('HIT!');
-	  	object.isHit = true; 
-	  	return object.isHit;
+	  	object.hasHit = true; 
+	  	return object.hasHit;
 	}
-		return object.isHit = false;
+		return object.hasHit = false;
+	}	
 }
 
 function updateScore(){
@@ -151,6 +156,12 @@ function updateLives(){
 /**********************************************
 			GEEK FUNCTIONS
 **********************************************/
+function checkForm(){
+	if(geek1.checkForm == 'knight'){
+
+	}
+}
+
 function Geek(){
 	this.srcX = 0; 
 	this.srcY = 320; 
@@ -170,6 +181,7 @@ function Geek(){
 	this.rightX = this.drawX + this.width;
 	this.topY = this.drawY;
 	this.bottomY = this.drawY + this.height;
+	this.hasHit = false;
 
 
 
@@ -275,7 +287,7 @@ function Obstacle(){
 	this.drawY = 280; 
 
 	//hitbox coordinates
-	this.isHit = false;  
+	this.hasHit = false;  
 	this.leftX = this.drawX;
 	this.rightX = this.drawX + this.width;
 	this.topY = this.drawY;
@@ -333,6 +345,9 @@ function drawAllObstacles(){
 	for(var i = 0; i < obstacles.length; i++){
 		obstacles[i].updateCoors();
 		checkHit(obstacles[i],geek1);
+		if(obstacles[i].hasHit){
+			obstacles[i].recycleObstacle();
+		}
 		obstacles[i].draw();
 
 	}
@@ -341,6 +356,46 @@ function drawAllObstacles(){
 
 /**********************************************
 			END OF OBSTACLE FUNCTIONS
+**********************************************/
+
+
+
+/**********************************************
+			POOF FUNCTIONS
+**********************************************/
+function Poof(){
+	this.srcX = 0; 
+	this.srcY = 578; 
+	this.width = 40; 
+	this.height = 25; 
+	this.drawX = 0; //draw at last squirrel update coors
+	this.drawY = 0; //draw at last squirrel update coors
+	this.currentFrame = 0; 
+	this.totalFrames = 10;
+}
+
+Poof.prototype.draw = function(){
+	if(this.currentFrame <= this.totalFrames){
+		ctx_jet.drawImage(
+ 			imgSprite,
+ 			this.srcX,
+ 			this.srcY,
+ 			this.width,
+ 			this.height,
+ 			this.drawX,
+ 			this.drawY,
+ 			this.width,
+ 			this.height);
+		this.currentFrame++;
+ 	}else{
+ 		this.hasHit = false;
+ 		this.currentFrame = 0; 
+ 	}
+};
+
+
+/**********************************************
+			END OF POOF FUNCTIONS
 **********************************************/
 
 
@@ -361,7 +416,7 @@ function Bowtie(){
 
 
 	//hitbox coordinates 
-	this.isHit = false;
+	this.hasHit = false;
 	this.leftX = this.drawX;
 	this.rightX = this.drawX + this.width;
 	this.topY = this.drawY;

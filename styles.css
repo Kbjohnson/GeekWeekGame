@@ -6,7 +6,7 @@
 #canvas_Bg{
 	border: 3px solid black;
 }
-#geek, #obstacle, #score, #lives, #bowtie{
+#geek, #obstacle, #score, #lives, #bowtie, #poof{
 	display:block;
 	position: absolute;
 	top: 0;
