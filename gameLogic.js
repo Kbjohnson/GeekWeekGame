@@ -19,6 +19,9 @@ var ctx_score = score.getContext('2d');
 var gameWidth = canvas_Bg.width;
 var gameHeight = canvas_Bg.height; 
 
+var bgDrawX1 = 0;
+var bgDrawX2 = 2760;
+
 //request animation frame
 var isPlaying = 'false'; 		//request Animation Frame in the browser
 var requestAnimFrame = window.requestAnimationFrame ||
@@ -34,10 +37,14 @@ var imgSprite = new Image();
 imgSprite.src = 'gameImg/sprite1.png';
 imgSprite.addEventListener('load',init,false);
 
+var background_sprite = new Image();
+background_sprite.src = 'gameImg/background_sprite.png';
+background_sprite.addEventListener('load',drawBg,false);
+
 var obstacles = []; 
 var bowties = []; 
-var obstacle_amount = 3;
-var bowtie_amount = 3; 
+var obstacle_amount = 6;
+var bowtie_amount = 6; 
 var geek1; 
 var poof1 = new Poof(); 
 
@@ -66,11 +73,11 @@ function loop(){
 
 	if(isPlaying){
 		drawBg();
+		moveBg();
 		geek1.draw();
 		updateScore();
 		updateLives();
 		drawAllObstacles(); 
-		poof1.draw();
 		drawAllBowties();
 		requestAnimFrame(loop);
 	
@@ -88,22 +95,37 @@ function stopLoop(){
 
 // Before scrolling
 function drawBg(){
-	var srcX = 0; 
-	var srcY = 0; 
-	var drawX = 0;
-	var drawY = 0; 
-	ctx_Bg.drawImage(imgSprite,
-		srcX,
-		srcY,
-		gameWidth,
+	ctx_Bg.clearRect(0,0,gameWidth,gameHeight); 
+	ctx_Bg.drawImage(background_sprite,
+		0,
+		0,
+		2760,
 		gameHeight,
-		drawX,
-		drawY,
-		gameWidth,
+		bgDrawX1,
+		0,
+		2760,
+		gameHeight);
+	ctx_Bg.drawImage(background_sprite,
+		0,
+		0,
+		2760,
+		gameHeight,
+		bgDrawX2,
+		0,
+		2760,
 		gameHeight);
 }
 
-
+function moveBg (){
+	bgDrawX1 -=3;
+	bgDrawX2 -=3; 
+	if (bgDrawX1 <= -2760){
+		bgDrawX1 = 2760;
+	}else if (bgDrawX2 <= -2760){
+		bgDrawX2 = 2760;
+	}
+	drawBg();
+}
 function clear_ctx_Bg(){
 	ctx_Bg.clearRect(0,0,gameWidth,gameHeight); 
 }
@@ -156,8 +178,11 @@ function updateLives(){
 /**********************************************
 			GEEK FUNCTIONS
 **********************************************/
-function checkForm(){
-	if(geek1.checkForm == 'knight'){
+
+//change form when knight head is hit
+
+function changeForm(){
+	if(geek1.knightForm == false){
 
 	}
 }
@@ -182,6 +207,7 @@ function Geek(){
 	this.topY = this.drawY;
 	this.bottomY = this.drawY + this.height;
 	this.hasHit = false;
+	this.knightForm = true;
 
 
 
@@ -317,6 +343,23 @@ Obstacle.prototype.checkEscaped = function(){
 	}
 }
 
+Obstacle.prototype.hitAction = function (){ 
+		if(geek1.knightForm){
+			poof1.drawX = this.drawX;
+			poof1.drawY = this.drawY; 
+			this.recycleObstacle();
+			poof1.draw();
+		}else{
+			poof1.drawX = this.drawX;
+			poof1.drawY = this.drawY; 
+			this.recycleObstacle();
+			poof1.draw();
+			geek1.lives -= 1; 
+			updateLives();
+		}
+		
+}
+
 Obstacle.prototype.recycleObstacle = function(){
 	this.drawX = Math.floor(Math.random()*1000) + gameWidth;
 	this.drawY = 280; //this.drawY should matchup
@@ -346,7 +389,7 @@ function drawAllObstacles(){
 		obstacles[i].updateCoors();
 		checkHit(obstacles[i],geek1);
 		if(obstacles[i].hasHit){
-			obstacles[i].recycleObstacle();
+			obstacles[i].hitAction();
 		}
 		obstacles[i].draw();
 
@@ -371,12 +414,12 @@ function Poof(){
 	this.drawX = 0; //draw at last squirrel update coors
 	this.drawY = 0; //draw at last squirrel update coors
 	this.currentFrame = 0; 
-	this.totalFrames = 10;
+	this.totalFrames = 5;
 }
 
-Poof.prototype.draw = function(){
+Poof.prototype.draw = function(){	
 	if(this.currentFrame <= this.totalFrames){
-		ctx_jet.drawImage(
+		ctx_geek.drawImage(
  			imgSprite,
  			this.srcX,
  			this.srcY,
@@ -447,8 +490,16 @@ Bowtie.prototype.updateCoors = function(){
 }
 
 Bowtie.prototype.hitAction = function(){
+	this.recycleBowtie();
 	geek1.score += 10;
+	return this.updateCoors();
+	
 
+}
+
+Bowtie.prototype.recycleBowtie = function(){
+	this.drawX = 0;  //this.drawY should matchup
+	this.drawY = 0; 
 }
 
 function clear_ctx_bowtie(){
@@ -465,7 +516,7 @@ function drawAllBowties(){
 	clear_ctx_bowtie(); 
 	for(var i = 0; i < bowties.length; i++){
 		checkHit(bowties[i],geek1);
-		if(bowties[i].isHit){
+		if(bowties[i].hasHit){
 			bowties[i].hitAction();
 		}
 		bowties[i].draw();
