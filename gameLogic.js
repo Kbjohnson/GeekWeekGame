@@ -327,21 +327,28 @@ Geek.prototype.checkKeys = function(){
  	}
  	if(this.isUpKey && this.topY > y_limit){
  		
- 			this.drawY -= this.speed; 
+ 			this.drawY -= 3; 
  			this.srcX = 0;
 	 		this.srcY = 70;
  		
  	}
  	if(this.isDownKey && this.bottomY < gameHeight){
  		if(this.drawY < 240){
- 			this.drawY += this.speed; 
+ 			this.drawY += 0.25; 
  		}
  	}
 };
 
 Geek.prototype.jump = function() {
-	
- 	
+	this.updateCoors();
+	if(this.bottomY == 310 && this.topY >= y_limit ){
+		this.isDownKey = true;
+		console.log('jump');
+		for(var i = 0; i < 10; i++){
+			this.drawY = this.drawY - 5;
+			console.log('add to drawY');
+		}
+	}
 };
 
 
