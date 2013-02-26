@@ -334,7 +334,7 @@ Geek.prototype.checkKeys = function(){
  	}
  	if(this.isDownKey && this.bottomY < gameHeight){
  		if(this.drawY < 240){
- 			this.drawY += 0.25; 
+ 			this.drawY += 0.5; 
  		}
  	}
 };
@@ -344,8 +344,10 @@ Geek.prototype.jump = function() {
 	if(this.bottomY == 310 && this.topY >= y_limit ){
 		this.isDownKey = true;
 		console.log('jump');
-		for(var i = 0; i < 10; i++){
-			this.drawY = this.drawY - 5;
+		for(var i = 0; i < 125; i++){
+			this.drawY -= 0.5; 
+ 			this.srcX = 0;
+	 		this.srcY = 70;
 			console.log('add to drawY');
 		}
 	}
