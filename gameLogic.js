@@ -16,8 +16,8 @@ var score = document.getElementById('score');
 var ctx_score = score.getContext('2d'); 
  
 
-var gameWidth = canvas_Bg.width;
-var gameHeight = canvas_Bg.height; 
+var gameWidth = 920;
+var gameHeight = 320; 
 
 var bgDrawX1 = 0;
 var bgDrawX2 = 2760; //2760
@@ -33,13 +33,10 @@ var requestAnimFrame = window.requestAnimationFrame ||
 
 var y_limit = 200; 
 
-//Sprite
-var imgSprite = new Image();
-imgSprite.src = 'gameImg/sprite1.png';
-imgSprite.addEventListener('load',init,false);
+
 
 var background_sprite = new Image();
-background_sprite.src = 'gameImg/background_sprite.png';
+background_sprite.src = 'gameImg/game_background.png';
 background_sprite.addEventListener('load',drawBg,false);
 
 var sprite = new Image();
@@ -224,16 +221,16 @@ function updateLives(){
 
 function changeForm(geek1, obstacle){
 	if(obstacle.isHelmet == true && geek1.knightForm == false){	
-		geek1.srcX = 0; // GIVE
-		geek1.srcY = 0; // GIVE
+		geek1.srcX = 350; // GIVE
+		geek1.srcY = 660; // GIVE
 		return geek1.knightForm = true;
 	}
 }
 
 function Geek(){
-	this.srcX = 0; 
-	this.srcY = 70; 
-	this.width = 60; 
+	this.srcX = 98; 
+	this.srcY = 655; 
+	this.width = 45; 
 	this.height = 70;
 	this.speed = 1; //3 pixels every draw cycle 
 	this.drawX = 150;
@@ -242,7 +239,7 @@ function Geek(){
 	this.isLeftKey = false;
 	this.isRightKey = false;
 	this.score = 0; 
-	this.lives = 3; //lives -1 if hits a obstacle
+	this.lives = 5; //lives -1 if hits a obstacle
 
 	//hitbox coordinates 
 	this.leftX = this.drawX;
@@ -257,35 +254,19 @@ Geek.prototype.draw = function(){
  	clear_ctx_geek();
  	this.updateCoors();
  	this.checkKeys();
- 	
- 	if(this.rightX%17 == 0){
- 		this.srcX = 60;
- 		
- 		ctx_geek.drawImage(
- 			imgSprite,
- 			this.srcX,
- 			this.srcY,
- 			this.width,
- 			this.height,
- 			this.drawX,
- 			this.drawY,
- 			this.width,
- 			this.height);
- 		this.updateCoors();
-	 }else{
-	 	
-	 	ctx_geek.drawImage(
- 			imgSprite,
- 			this.srcX,
- 			this.srcY,
- 			this.width,
- 			this.height,
- 			this.drawX,
- 			this.drawY,
- 			this.width,
- 			this.height);
-	 		this.updateCoors();
-	 }
+	
+	ctx_geek.drawImage(
+		sprite,
+		this.srcX,
+		this.srcY,
+		this.width,
+		this.height,
+		this.drawX,
+		this.drawY,
+		this.width,
+		this.height);
+	this.updateCoors();
+	 
 };
 
 Geek.prototype.updateCoors = function(){
@@ -298,38 +279,47 @@ Geek.prototype.updateCoors = function(){
 
 Geek.prototype.checkKeys = function(){
  	
- 	if(this.isSpaceBar){
+ 	if(this.isSpaceBar || this.isRightKey && this.isSpaceBar ||this.isLeftKey && this.isSpaceBar){
+		if(!geek1.knightForm){
+ 			this.srcX = 180; 
+ 			 
+ 			this.drawX -= this.speed; // + for hurdling effect
+ 		}else{
+ 			this.srcX = 480;
+
+ 			this.drawX -= this.speed;
+ 		}
+
  		this.jump();
  		this.isSpaceBar = false;
  	}
  	
- 	if(this.isLeftKey && this.leftX > 0){//this.rightX < gameWidth
+ 	if(this.isLeftKey && this.leftX > 0 ){//this.rightX < gameWidth
  		if(!geek1.knightForm){
- 			this.srcX = 60; 
- 			this.srcY = 70; //-1
+ 			this.srcX = 303; 
+ 			 
  			this.drawX -= this.speed; // + for hurdling effect
  		}else{
- 			this.srcX = 0; 
- 			this.srcY = 0; //-1
+ 			this.srcX = 652;
+
  			this.drawX -= this.speed;
  		}
  	}
  	if(this.isRightKey && this.rightX < gameWidth){
  		if(!geek1.knightForm){
- 			this.srcX = 0;
- 			this.srcY = 70;
+ 			this.srcX = 98;
+
  			this.drawX += this.speed;
  		}else{
- 			this.srcX = 0;
- 			this.srcY = 0;
+ 			this.srcX = 350;
+ 			
  			this.drawX += this.speed;
  		}
  	}
  	if(this.isUpKey && this.topY > y_limit){
  		
  			this.drawY -= 3; 
- 			this.srcX = 0;
-	 		this.srcY = 70;
+ 			this.srcX = 180;
  		
  	}
  	if(this.isDownKey && this.bottomY < gameHeight){
@@ -345,9 +335,15 @@ Geek.prototype.jump = function() {
 		this.isDownKey = true;
 		console.log('jump');
 		for(var i = 0; i < 125; i++){
-			this.drawY -= 0.5; 
- 			this.srcX = 0;
-	 		this.srcY = 70;
+ 			if(!geek1.knightForm){
+ 				this.srcX = 180;
+ 			 
+ 				this.drawY -= 0.5; 
+ 			}else{
+ 				this.srcX = 480;
+
+ 				this.drawY -= 0.5; 
+ 			}
 			console.log('add to drawY');
 		}
 	}
@@ -370,11 +366,11 @@ function clear_ctx_geek(){
 **********************************************/
 
 function Obstacle(){
-	this.srcX = 0; 
-	this.srcY = 140; 
-	this.width = 48; 
-	this.height = 28;
-	this.speed = 1; //1 pixels every draw cycle 
+	this.srcX = 719; 
+	this.srcY = 653; 
+	this.width = 35; 
+	this.height = 24;
+	this.speed = 2; //1 pixels every draw cycle 
 	this.drawX = Math.floor(Math.random() * 1000) + gameWidth;
 	this.drawY = 280; 
 
@@ -391,12 +387,9 @@ function Obstacle(){
 Obstacle.prototype.draw = function(){
 	this.drawX -= this.speed;
 	this.updateCoors();
-	if(this.leftX%23 == 0){ // raise the mod value for slower animation
-		this.srcX = 48; 
-		this.srcY = 140; 
 		
 		ctx_obstacle.drawImage(
- 			imgSprite,
+ 			sprite,
  			this.srcX,
  			this.srcY,
  			this.width,
@@ -405,24 +398,7 @@ Obstacle.prototype.draw = function(){
  			this.drawY,
  			this.width,
  			this.height);
- 		this.checkEscaped(); 	
-
-	}else{
-		this.srcX = 0;
-		this.srcY = 140;  
- 		
- 		ctx_obstacle.drawImage(
-	 		imgSprite,
- 			this.srcX,
- 			this.srcY,
- 			this.width,
- 			this.height,
- 			this.drawX,
- 			this.drawY,
- 			this.width,
- 			this.height);
- 		this.checkEscaped();
- 	} 
+ 		this.checkEscaped(); 
 };
 
 Obstacle.prototype.checkEscaped = function(){
@@ -474,14 +450,13 @@ function spawnObstacles(number){
 function drawAllObstacles(){
 	clear_ctx_obstacle(); 
 	for(var i = 0; i < obstacles.length; i++){
-		// draw the knight head sparkle
 		obstacles[i].updateCoors();
 		checkHit(obstacles[i],geek1);
 		if(obstacles[i].hasHit){
 			if(i == obstacles.length-1){
 			obstacles[i].srcX = 96;//GIVE
 			obstacles[i].srcY = 140;//GIVE 
-			obstacles[i].isHelmet = true; 
+	
 		}
 			obstacles[i].hitAction();
 		}
@@ -514,7 +489,7 @@ function Poof(){
 Poof.prototype.draw = function(){	
 	if(this.currentFrame <= this.totalFrames){
 		ctx_geek.drawImage(
- 			imgSprite,
+ 			sprite,
  			this.srcX,
  			this.srcY,
  			this.width,
@@ -543,8 +518,8 @@ Poof.prototype.draw = function(){
 **********************************************/
 
 function Bowtie(){
-	this.srcX = 152; 
-	this.srcY = 140; 
+	this.srcX = 719; 
+	this.srcY = 686; 
 	this.width = 24; 
 	this.height = 24;
 	this.drawX = Math.floor(Math.random()*gameWidth) + 1;
@@ -567,7 +542,7 @@ function Bowtie(){
 Bowtie.prototype.draw = function(){
 	this.updateCoors();
  	ctx_bowtie.drawImage(
- 		imgSprite,
+ 		sprite,
  		this.srcX,
  		this.srcY,
  		this.width,
@@ -614,6 +589,7 @@ function spawnBowties(number){
 }
 
 function drawAllBowties(){
+	
 	clear_ctx_bowtie(); 
 
 	var x = Math.floor((Math.random()*(bowties.length-1)));
@@ -624,14 +600,14 @@ function drawAllBowties(){
 		checkHit(bowties[i],geek1);
 
 		if(geek1.knightForm == true){
-			bowties[i].srcX = 152;
-			bowties[i].srcY = 140;  
+			bowties[i].srcX = 716;
+			bowties[i].srcY = 686;  
 		}else{
 			if(geek1.score >= 500){
 		// if NOT knight && if knight head NOT spawned THEN SPAWN KNIGHT HEAD
 				if( i === x && !bowties[i].isHelmet){
-					bowties[i].srcX = 96;
-					bowties[i].srcY = 140;  
+					bowties[i].srcX = 806;
+					bowties[i].srcY = 686;  
 					bowties[i].isHelmet = true;
 				}
 			}
