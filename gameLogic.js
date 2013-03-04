@@ -14,14 +14,16 @@ var lives = document.getElementById('lives');
 var ctx_lives = lives.getContext('2d'); 
 var score = document.getElementById('score');
 var ctx_score = score.getContext('2d'); 
+
+var animTimer;
  
 
 var gameWidth = 920;
 var gameHeight = 320; 
+var life_width = 81;
 
 var bgDrawX1 = 0;
 var bgDrawX2 = 2760; //2760
-var btnPlay = new Button(265, 535, 220, 335);
 
 //request animation frame
 var isPlaying = 'false'; 		//request Animation Frame in the browser
@@ -60,22 +62,21 @@ var poof1 = new Poof();
 /**********************************************
 				MAIN FUNCTIONS
 **********************************************/
+
+function refresh(){
+	window.location.href = window.location.href;
+}
 function init() {
 	geek1 = new Geek();
 	spawnObstacles(obstacle_amount);
 	spawnBowties(bowtie_amount); 
-	startLoop();
-	//event listener for click
-	document.addEventListener('click',mouseClicked, false);
-	//event listeners for keys
-	document.addEventListener('keydown',checkKeyDown,false);
-	document.addEventListener('keyup',checkKeyUp,false);
+	drawMenu();
+	document.getElementsByTagName('BODY')[0].onclick = function () { playGame()};
 
 }
 
 function playGame() {
     startLoop();
-    updateHUD();
     document.addEventListener('keydown', checkKeyDown, false);
     document.addEventListener('keyup', checkKeyUp, false);
 }
@@ -88,7 +89,7 @@ function loop(){
 		drawMenu(); 
 		drawBg();
 		moveBg();
-		geek1.draw();
+		geek1.draw(); 
 		updateScore();
 		updateLives();
 		drawAllObstacles(); 
@@ -112,6 +113,9 @@ function drawMenu() {
 }
 function drawWinScreen() {
     ctx_Bg.drawImage(sprite, 0, 320, gameWidth, gameHeight, 0, 0, gameWidth, gameHeight);
+
+    document.getElementsByTagName('BODY')[0].onclick = function () { refresh()};
+
 }
 
 // Before scrolling
@@ -135,6 +139,7 @@ function drawBg(){
 		0,
 		2760,
 		gameHeight);
+
 }
 
 function moveBg (){
@@ -150,6 +155,7 @@ function moveBg (){
 function clear_ctx_Bg(){
 	ctx_Bg.clearRect(0,0,gameWidth,gameHeight); 
 }
+
 
 /**********************************************
 			END OF MAIN FUNCTIONS
@@ -189,23 +195,43 @@ function checkHit(object,geek){
 
 function updateScore(){
 	ctx_score.clearRect(0,0,gameWidth,gameHeight); 
-	ctx_score.fillText('Score: ' + geek1.score, 825, 35); // change this to be in the middle of a div
+	ctx_score.drawImage(sprite,842,688,75,24,813,20,75,24);
 
+	if(geek1.score <=1250){
+		ctx_score.fillText('Score: ' + geek1.score, 825, 35); // change this to be in the middle of a div
+	}else{
+		drawWinScreen();
+	}
 }
 function updateLives(){
 	if(geek1.lives == 0 ){
 		//FIX THIS BULLSHIT
-		stopLoop();
 		clear_ctx_Bg();
-		ctx_bowtie.clearRect(0,0,gameWidth,gameHeight);
+		bowties = [];
+		obstacles = [];
 		clear_ctx_geek();
 		clear_ctx_obstacle();
+		clear_ctx_bowtie();
 		drawWinScreen();
 	}
 	ctx_lives.clearRect(0,0,gameWidth,gameHeight);
-	ctx_lives.fillText('Lives left: ' + geek1.lives, 725, 35);
+	ctx_lives.drawImage(sprite,837,653,life_width,24,725,20,life_width,24);
+
 	
 }
+function animate(object, firstX, secondX){
+    setTimeout(function(){
+        	object.srcX = firstX;
+        setTimeout(function(){
+            object.srcX = secondX;
+            animate();
+        }, 1000);
+    }, 1000);
+
+}
+
+
+
 
 /**********************************************
 			END HIT DETECTION FUNCTIONS
@@ -221,6 +247,8 @@ function updateLives(){
 
 function changeForm(geek1, obstacle){
 	if(obstacle.isHelmet == true && geek1.knightForm == false){	
+		geek1.speed = 5; 
+	 
 		geek1.srcX = 350; // GIVE
 		geek1.srcY = 660; // GIVE
 		return geek1.knightForm = true;
@@ -232,14 +260,14 @@ function Geek(){
 	this.srcY = 655; 
 	this.width = 45; 
 	this.height = 70;
-	this.speed = 1; //3 pixels every draw cycle 
+	this.speed = 2.5; //3 pixels every draw cycle 
 	this.drawX = 150;
 	this.drawY = 240; 
 	this.isSpaceBar = false;
 	this.isLeftKey = false;
 	this.isRightKey = false;
 	this.score = 0; 
-	this.lives = 5; //lives -1 if hits a obstacle
+	this.lives = 3; //lives -1 if hits a obstacle
 
 	//hitbox coordinates 
 	this.leftX = this.drawX;
@@ -281,8 +309,7 @@ Geek.prototype.checkKeys = function(){
  	
  	if(this.isSpaceBar || this.isRightKey && this.isSpaceBar ||this.isLeftKey && this.isSpaceBar){
 		if(!geek1.knightForm){
- 			this.srcX = 180; 
- 			 
+ 		
  			this.drawX -= this.speed; // + for hurdling effect
  		}else{
  			this.srcX = 480;
@@ -296,22 +323,23 @@ Geek.prototype.checkKeys = function(){
  	
  	if(this.isLeftKey && this.leftX > 0 ){//this.rightX < gameWidth
  		if(!geek1.knightForm){
- 			this.srcX = 303; 
- 			 
+ 			animate(geek1,303,267);
  			this.drawX -= this.speed; // + for hurdling effect
  		}else{
- 			this.srcX = 652;
+ 			
+ 			animate(geek1,595,652);
 
  			this.drawX -= this.speed;
  		}
+ 		
  	}
  	if(this.isRightKey && this.rightX < gameWidth){
  		if(!geek1.knightForm){
- 			this.srcX = 98;
-
+ 			animate(geek1,143,98);
  			this.drawX += this.speed;
  		}else{
- 			this.srcX = 350;
+ 			
+ 			animate(geek1,420,350);
  			
  			this.drawX += this.speed;
  		}
@@ -327,7 +355,10 @@ Geek.prototype.checkKeys = function(){
  			this.drawY += 0.5; 
  		}
  	}
+
 };
+ 	
+
 
 Geek.prototype.jump = function() {
 	this.updateCoors();
@@ -418,7 +449,9 @@ Obstacle.prototype.hitAction = function (){
 			poof1.drawY = this.drawY; 
 			this.recycleObstacle();
 			poof1.draw();
-			geek1.lives -= 1; 
+			geek1.lives -= 1;
+			life_width = life_width - 27;
+
 			updateLives();
 		}
 		
@@ -454,8 +487,8 @@ function drawAllObstacles(){
 		checkHit(obstacles[i],geek1);
 		if(obstacles[i].hasHit){
 			if(i == obstacles.length-1){
-			obstacles[i].srcX = 96;//GIVE
-			obstacles[i].srcY = 140;//GIVE 
+			obstacles[i].srcX = 719;//GIVE
+			obstacles[i].srcY = 653;//GIVE 
 	
 		}
 			obstacles[i].hitAction();
@@ -476,13 +509,13 @@ function drawAllObstacles(){
 			POOF FUNCTIONS
 **********************************************/
 function Poof(){
-	this.srcX = 124; 
-	this.srcY = 140; 
-	this.width = 24; 
+	this.srcX = 795; 
+	this.srcY = 653; 
+	this.width = 40; 
 	this.height = 24; 
 	this.drawX = 0; //draw at last squirrel update coors
 	this.drawY = 0; //draw at last squirrel update coors
-	this.currentFrame = 0; 
+	this.currentFrame = 10; 
 	this.totalFrames = 5;
 }
 
@@ -600,9 +633,9 @@ function drawAllBowties(){
 		checkHit(bowties[i],geek1);
 
 		if(geek1.knightForm == true){
-			bowties[i].srcX = 716;
+			bowties[i].srcX = 720;
 			bowties[i].srcY = 686;  
-		}else{
+		}else{ 
 			if(geek1.score >= 500){
 		// if NOT knight && if knight head NOT spawned THEN SPAWN KNIGHT HEAD
 				if( i === x && !bowties[i].isHelmet){
@@ -647,24 +680,6 @@ function drawAllBowties(){
 			EVENT FUNCTIONS
 **********************************************/
 
-function Button(xL, xR, yT, yB) {
-    this.xLeft = xL;
-    this.xRight = xR;
-    this.yTop = yT;
-    this.yBottom = yB;
-}
-
-Button.prototype.checkClicked = function() {
-    if (this.xLeft <= mouseX && mouseX <= this.xRight && this.yTop <= mouseY && mouseY <= this.yBottom) return true;
-};
-
-function mouseClicked(e) {
-    mouseX = e.pageX - canvas_Bg.offsetLeft;
-    mouseY = e.pageY - canvas_Bg.offsetTop;
-    if (!isPlaying) {
-        if (btnPlay.checkClicked()) playGame();
-    }
-}
 
 function checkKeyDown(e){
 	var keyID = e.keyCode || e.which;
