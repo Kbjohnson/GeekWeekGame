@@ -16,7 +16,7 @@ var score = document.getElementById('score');
 var ctx_score = score.getContext('2d'); 
 
 var animTimer;
- 
+var tid;
 
 var gameWidth = 920;
 var gameHeight = 320; 
@@ -51,11 +51,13 @@ var obstacle_amount = 3;
 var bowtie_amount = 2; 
 var geek1; 
 var poof1 = new Poof(); 
+ 
+var firstX = 98;
+var secondX = 143;
 
 /**********************************************
 			END OF GLOBAL VARIABLES
 **********************************************/
-
 
 
 
@@ -179,11 +181,9 @@ function checkHit(object,geek){
 	   object.rightX >= geek.leftX &&
 	   object.topY >= geek.topY &&
 	   object.topY <= geek.bottomY)){
-	  	console.log('HIT!');
 	  	object.hasHit = true; 
 
 	  	if(object.isHelmet) {
-	  		console.log('hit knight head')
 			changeForm(geek,object);	
 	  	}
 
@@ -200,6 +200,14 @@ function updateScore(){
 	if(geek1.score <=1250){
 		ctx_score.fillText('Score: ' + geek1.score, 825, 35); // change this to be in the middle of a div
 	}else{
+		clear_ctx_Bg();
+		bowties = [];
+		obstacles = [];
+		clear_ctx_geek();
+		clear_ctx_Bg();
+		ctx_lives.clearRect(0,0,gameWidth,gameHeight);
+		clear_ctx_obstacle();
+		clear_ctx_bowtie();
 		drawWinScreen();
 	}
 }
@@ -219,15 +227,31 @@ function updateLives(){
 
 	
 }
-function animate(object, firstX, secondX){
-    setTimeout(function(){
-        	object.srcX = firstX;
+function animate(){
+if( geek1.srcX !== firstX) {
+	geek1.srcX = firstX;
+} else {
+	geek1.srcX = secondX;
+}
+console.log('animate');
+	/*
+    setInterval(function(){
+        geek1.srcX = firstX;
         setTimeout(function(){
-            object.srcX = secondX;
+            geek1.srcX = secondX;
             animate();
         }, 1000);
-    }, 1000);
+    }, 2000);
+*/
+}
 
+var alexIsAwesome = setInterval(function(){
+	animate();
+}, 1000);
+
+
+function clearAnimation(){
+	clearTimeout(tid);
 }
 
 
@@ -254,13 +278,21 @@ function changeForm(geek1, obstacle){
 		return geek1.knightForm = true;
 	}
 }
-
+function knightTimer(){
+	//set timer 
+	if(geek1.knightForm = true){
+		while(){// timer less than something
+		geek1.knightForm = true;
+		}
+	}
+	  geek1.knightForm = false;
+}
 function Geek(){
 	this.srcX = 98; 
 	this.srcY = 655; 
 	this.width = 45; 
 	this.height = 70;
-	this.speed = 2.5; //3 pixels every draw cycle 
+	this.speed = 2; //3 pixels every draw cycle 
 	this.drawX = 150;
 	this.drawY = 240; 
 	this.isSpaceBar = false;
@@ -308,6 +340,7 @@ Geek.prototype.updateCoors = function(){
 Geek.prototype.checkKeys = function(){
  	
  	if(this.isSpaceBar || this.isRightKey && this.isSpaceBar ||this.isLeftKey && this.isSpaceBar){
+
 		if(!geek1.knightForm){
  		
  			this.drawX -= this.speed; // + for hurdling effect
@@ -323,24 +356,30 @@ Geek.prototype.checkKeys = function(){
  	
  	if(this.isLeftKey && this.leftX > 0 ){//this.rightX < gameWidth
  		if(!geek1.knightForm){
- 			animate(geek1,303,267);
- 			this.drawX -= this.speed; // + for hurdling effect
- 		}else{
  			
- 			animate(geek1,595,652);
-
+			firstX = 303;
+			secondX = 267;
+ 			this.drawX -= this.speed; // + for hurdling effect
+ 		
+ 		}else{
+ 			firstX = 595;
+ 			secondX = 652;
+			//animate(geek1,595,652);
  			this.drawX -= this.speed;
  		}
  		
  	}
  	if(this.isRightKey && this.rightX < gameWidth){
  		if(!geek1.knightForm){
- 			animate(geek1,143,98);
+
+			firstX = 143;
+			secondX = 98;
  			this.drawX += this.speed;
+
  		}else{
- 			
- 			animate(geek1,420,350);
- 			
+ 			firstX = 350;
+ 			secondX = 420;
+ 			//animate(geek1,420,350);
  			this.drawX += this.speed;
  		}
  	}
@@ -364,7 +403,6 @@ Geek.prototype.jump = function() {
 	this.updateCoors();
 	if(this.bottomY == 310 && this.topY >= y_limit ){
 		this.isDownKey = true;
-		console.log('jump');
 		for(var i = 0; i < 125; i++){
  			if(!geek1.knightForm){
  				this.srcX = 180;
@@ -375,7 +413,6 @@ Geek.prototype.jump = function() {
 
  				this.drawY -= 0.5; 
  			}
-			console.log('add to drawY');
 		}
 	}
 };
@@ -486,14 +523,15 @@ function drawAllObstacles(){
 		obstacles[i].updateCoors();
 		checkHit(obstacles[i],geek1);
 		if(obstacles[i].hasHit){
-			if(i == obstacles.length-1){
-			obstacles[i].srcX = 719;//GIVE
-			obstacles[i].srcY = 653;//GIVE 
-	
-		}
 			obstacles[i].hitAction();
 		}
-		obstacles[i].draw();
+
+		if(obstacles[i].drawX%37 == 0){
+			obstacles[i].srcX = 754;
+		}else{
+			obstacles[i].srcX = 719;
+		}	
+			obstacles[i].draw();
 
 	}
 }

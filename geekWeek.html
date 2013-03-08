@@ -6,7 +6,7 @@
 	<link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
-<body>
+<body id ='target'>
 
 
 
@@ -22,8 +22,39 @@
 			
 
 			<script src= 'gameLogic.js'></script>
-
+			<script src='http://code.jquery.com/jquery-latest.js'></script>
 		
+		<script type="text/javascript">
+		$(document).ready(function(){
+			$(window).keydown(function(e){
+
+				switch(e.which) {
+					case 32:
+						window.clearInterval(alexIsAwesome);
+						alexIsAwesome = false;
+						console.log('space');
+						break;
+					case 37:
+						
+
+						break;
+					case 39:
+						
+						break;
+				}
+
+				if(alexIsAwesome === false) { 
+					alexIsLegit();
+				}
+			});
+
+			function alexIsLegit() {
+				animate();
+				alexIsAwesome = setInterval(function(){ animate() }, 1000);
+				console.log('setInterval');
+			}
+		});
+		</script>
 
 </body>
 
