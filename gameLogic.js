@@ -279,13 +279,13 @@ function changeForm(geek1, obstacle){
 	}
 }
 function knightTimer(){
-	//set timer 
+	/*//set timer 
 	if(geek1.knightForm = true){
 		while(){// timer less than something
 		geek1.knightForm = true;
 		}
 	}
-	  geek1.knightForm = false;
+	  geek1.knightForm = false;*/
 }
 function Geek(){
 	this.srcX = 98; 
