@@ -11,14 +11,15 @@
 
 
 			<!-- 930x320 --> 
-			<canvas id = 'canvas_Bg' width = '920px' height ='320px'></canvas>
-			<canvas id = 'geek' width = '920px' height = '320px'></canvas>
-			<canvas id = 'obstacle' width = '920px' height = '320px'></canvas>
-			<canvas id = 'bowtie' width = '920px' height = '320px'></canvas>
+			<canvas id='canvas_Bg' width = '920px' height ='320px'></canvas>
+			<canvas id='logo' width = '920px' height ='320px'></canvas>
+			<canvas id='geek' width = '920px' height = '320px'></canvas>
+			<canvas id='obstacle' width = '920px' height = '320px'></canvas>
+			<canvas id='bowtie' width = '920px' height = '320px'></canvas>
 			<!--May have to combine these two-->
-			<canvas id = 'lives' width = '920px' height = '320px'></canvas>
-			<canvas id = 'score' width = '920px' height = '320px'></canvas>	
-			<canvas id = 'poof' width = '920px' height = '320px'></canvas>	
+			<canvas id='lives' width = '920px' height = '320px'></canvas>
+			<canvas id='score' width = '920px' height = '320px'></canvas>	
+			<canvas id='poof' width = '920px' height = '320px'></canvas>	
 			
 
 			<script src= 'gameLogic.js'></script>
@@ -26,6 +27,11 @@
 		
 		<script type="text/javascript">
 		$(document).ready(function(){
+
+			$("#canvas_Bg").click(function() {
+				  $(this).css('z-index', 0);
+			});
+
 			$(window).keydown(function(e){
 
 				switch(e.which) {
@@ -55,6 +61,13 @@
 			}
 		});
 		</script>
+	
+		<audio autoplay loop>
+		      <source src="CV1stag3.mid">
+	    </audio
+
+ 			 
+	
 
 </body>
 

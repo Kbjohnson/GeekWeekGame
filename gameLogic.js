@@ -4,6 +4,8 @@
 
 var canvas_Bg = document.getElementById('canvas_Bg');
 var ctx_Bg = canvas_Bg.getContext('2d'); 
+var logo = document.getElementById('logo');
+var ctx_logo = logo.getContext('2d'); 
 var geek = document.getElementById('geek');
 var ctx_geek = geek.getContext('2d'); 
 var obstacle = document.getElementById('obstacle');
@@ -48,12 +50,12 @@ sprite.addEventListener('load',init,false);
 var obstacles = []; 
 var bowties = []; 
 var obstacle_amount = 3;
-var bowtie_amount = 2; 
+var bowtie_amount = 3; 
 var geek1; 
 var poof1 = new Poof(); 
  
-var firstX = 98;
-var secondX = 143;
+var firstX = 0;
+var secondX = 71;
 
 /**********************************************
 			END OF GLOBAL VARIABLES
@@ -73,7 +75,7 @@ function init() {
 	spawnObstacles(obstacle_amount);
 	spawnBowties(bowtie_amount); 
 	drawMenu();
-	document.getElementsByTagName('BODY')[0].onclick = function () { playGame()};
+	document.getElementById('canvas_Bg').onclick = function () { playGame()};
 
 }
 
@@ -90,6 +92,7 @@ function loop(){
 	if(isPlaying){
 		drawMenu(); 
 		drawBg();
+		drawLogo();
 		moveBg();
 		geek1.draw(); 
 		updateScore();
@@ -114,6 +117,12 @@ function drawMenu() {
     ctx_Bg.drawImage(sprite, 0, 0, gameWidth, gameHeight, 0, 0, gameWidth, gameHeight);
 }
 function drawWinScreen() {
+    ctx_Bg.drawImage(sprite, 0, 968, gameWidth, gameHeight, 0, 0, gameWidth, gameHeight);
+
+    document.getElementsByTagName('BODY')[0].onclick = function () { refresh()};
+
+}
+function drawGameOverScreen() {
     ctx_Bg.drawImage(sprite, 0, 320, gameWidth, gameHeight, 0, 0, gameWidth, gameHeight);
 
     document.getElementsByTagName('BODY')[0].onclick = function () { refresh()};
@@ -158,7 +167,21 @@ function clear_ctx_Bg(){
 	ctx_Bg.clearRect(0,0,gameWidth,gameHeight); 
 }
 
-
+function drawLogo(){
+	ctx_logo.drawImage(background_sprite,793,648,gameWidth,gameHeight,46,0,gameWidth,gameHeight);
+	/*
+	ctx_geek.drawImage(
+		sprite,
+		this.srcX,
+		this.srcY,
+		this.width,
+		this.height,
+		this.drawX,
+		this.drawY,
+		this.width,
+		this.height);
+	*/
+}
 /**********************************************
 			END OF MAIN FUNCTIONS
 **********************************************/
@@ -195,11 +218,17 @@ function checkHit(object,geek){
 
 function updateScore(){
 	ctx_score.clearRect(0,0,gameWidth,gameHeight); 
-	ctx_score.drawImage(sprite,842,688,75,24,813,20,75,24);
+	ctx_score.drawImage(sprite,719,647,73,24,813,20,73,24);
 
-	if(geek1.score <=1250){
-		ctx_score.fillText('Score: ' + geek1.score, 825, 35); // change this to be in the middle of a div
-	}else{
+	if(geek1.knightForm && geek1.score >= 3000){
+
+		geek1.srcX = 0; 
+		geek1.srcY = 864;
+		geek1.knightForm = false;
+		
+	}
+	if (geek1.score >5000){
+		ctx_score.fillText('Score:' + geek1.score, 825, 35);
 		clear_ctx_Bg();
 		bowties = [];
 		obstacles = [];
@@ -210,6 +239,7 @@ function updateScore(){
 		clear_ctx_bowtie();
 		drawWinScreen();
 	}
+	ctx_score.fillText('Score:' + geek1.score, 825, 35);
 }
 function updateLives(){
 	if(geek1.lives == 0 ){
@@ -220,19 +250,25 @@ function updateLives(){
 		clear_ctx_geek();
 		clear_ctx_obstacle();
 		clear_ctx_bowtie();
-		drawWinScreen();
+		drawGameOverScreen();
 	}
 	ctx_lives.clearRect(0,0,gameWidth,gameHeight);
-	ctx_lives.drawImage(sprite,837,653,life_width,24,725,20,life_width,24);
+	ctx_lives.drawImage(sprite,360,647,life_width,24,725,20,life_width,24);
 
 	
 }
 function animate(){
 if( geek1.srcX !== firstX) {
+	if(!geek1.knightForm){
+		geek1.width = 50;
+	}else{
+		geek1.width = 70;
+	}
 	geek1.srcX = firstX;
 } else {
 	geek1.srcX = secondX;
 }
+
 console.log('animate');
 	/*
     setInterval(function(){
@@ -271,12 +307,16 @@ function clearAnimation(){
 
 function changeForm(geek1, obstacle){
 	if(obstacle.isHelmet == true && geek1.knightForm == false){	
-		geek1.speed = 5; 
-	 
-		geek1.srcX = 350; // GIVE
-		geek1.srcY = 660; // GIVE
-		return geek1.knightForm = true;
+		
+		geek1.speed = 2.5;
+	 	geek1.width = 70;
+	 	console.log(geek1.width);
+		geek1.srcX = 0; // GIVE
+		geek1.srcY = 792; // GIVE
+		geek1.knightForm = true;
+
 	}
+
 }
 function knightTimer(){
 	/*//set timer 
@@ -288,11 +328,11 @@ function knightTimer(){
 	  geek1.knightForm = false;*/
 }
 function Geek(){
-	this.srcX = 98; 
-	this.srcY = 655; 
-	this.width = 45; 
+	this.srcX = 0; 
+	this.srcY = 864; 
+	this.width = 46; 
 	this.height = 70;
-	this.speed = 2; //3 pixels every draw cycle 
+	this.speed = 1.5; //3 pixels every draw cycle 
 	this.drawX = 150;
 	this.drawY = 240; 
 	this.isSpaceBar = false;
@@ -341,15 +381,6 @@ Geek.prototype.checkKeys = function(){
  	
  	if(this.isSpaceBar || this.isRightKey && this.isSpaceBar ||this.isLeftKey && this.isSpaceBar){
 
-		if(!geek1.knightForm){
- 		
- 			this.drawX -= this.speed; // + for hurdling effect
- 		}else{
- 			this.srcX = 480;
-
- 			this.drawX -= this.speed;
- 		}
-
  		this.jump();
  		this.isSpaceBar = false;
  	}
@@ -357,13 +388,13 @@ Geek.prototype.checkKeys = function(){
  	if(this.isLeftKey && this.leftX > 0 ){//this.rightX < gameWidth
  		if(!geek1.knightForm){
  			
-			firstX = 303;
-			secondX = 267;
+			firstX = 288;
+			secondX = 360;
  			this.drawX -= this.speed; // + for hurdling effect
  		
  		}else{
- 			firstX = 595;
- 			secondX = 652;
+ 			firstX = 288;
+ 			secondX = 360;
 			//animate(geek1,595,652);
  			this.drawX -= this.speed;
  		}
@@ -372,23 +403,18 @@ Geek.prototype.checkKeys = function(){
  	if(this.isRightKey && this.rightX < gameWidth){
  		if(!geek1.knightForm){
 
-			firstX = 143;
-			secondX = 98;
+			firstX = 0;
+			secondX = 71;
  			this.drawX += this.speed;
 
  		}else{
- 			firstX = 350;
- 			secondX = 420;
+ 			firstX = 0;
+ 			secondX = 71;
  			//animate(geek1,420,350);
  			this.drawX += this.speed;
  		}
  	}
- 	if(this.isUpKey && this.topY > y_limit){
- 		
- 			this.drawY -= 3; 
- 			this.srcX = 180;
- 		
- 	}
+ 	
  	if(this.isDownKey && this.bottomY < gameHeight){
  		if(this.drawY < 240){
  			this.drawY += 0.5; 
@@ -397,21 +423,47 @@ Geek.prototype.checkKeys = function(){
 
 };
  	
+Geek.prototype.hitAction = function(){ 	
+	
+	if(geek1.isRightKey){
+		this.srcX = 432; 
+		this.srcY = 864;
+		this.width = 70; 
+	}if(geek1.isLeftKey){
+		this.srcX = 504; 
+		this.srcY = 864;
+		this.width = 70;
+	}else{
+		this.srcX = 432; 
+		this.srcY = 864;
+		this.width = 70;
+	}
 
-
+}
+	
 Geek.prototype.jump = function() {
 	this.updateCoors();
 	if(this.bottomY == 310 && this.topY >= y_limit ){
 		this.isDownKey = true;
 		for(var i = 0; i < 125; i++){
  			if(!geek1.knightForm){
- 				this.srcX = 180;
- 			 
+ 				if(geek1.isRightKey === true){ 
+ 					this.srcX = 144; //-> // 215 <- 
+ 			 	}if(geek1.isLeftKey === true ){
+ 			 		this.srcX = 215; 
+ 			 	}else{
+ 			 		this.srcX = 144; 
+ 			 	}
  				this.drawY -= 0.5; 
  			}else{
- 				this.srcX = 480;
-
- 				this.drawY -= 0.5; 
+ 				if(geek1.isRightKey ===  true){
+ 					this.srcX = 144;//->  // 215 <- 
+ 				}if(geek1.isLeftKey === true){
+					this.srcX = 215; 			
+ 				}else{
+ 					this.srcX = 144; 
+ 				}
+ 					this.drawY -= 0.5; 
  			}
 		}
 	}
@@ -434,11 +486,11 @@ function clear_ctx_geek(){
 **********************************************/
 
 function Obstacle(){
-	this.srcX = 719; 
-	this.srcY = 653; 
+	this.srcX = 144; 
+	this.srcY = 647; 
 	this.width = 35; 
 	this.height = 24;
-	this.speed = 2; //1 pixels every draw cycle 
+	this.speed = 2.5; //1 pixels every draw cycle 
 	this.drawX = Math.floor(Math.random() * 1000) + gameWidth;
 	this.drawY = 280; 
 
@@ -524,12 +576,15 @@ function drawAllObstacles(){
 		checkHit(obstacles[i],geek1);
 		if(obstacles[i].hasHit){
 			obstacles[i].hitAction();
+			if(geek1.knightForm === false){
+				geek1.hitAction();
+			}
 		}
 
 		if(obstacles[i].drawX%37 == 0){
-			obstacles[i].srcX = 754;
+			obstacles[i].srcX = 215;
 		}else{
-			obstacles[i].srcX = 719;
+			obstacles[i].srcX = 144;
 		}	
 			obstacles[i].draw();
 
@@ -547,8 +602,8 @@ function drawAllObstacles(){
 			POOF FUNCTIONS
 **********************************************/
 function Poof(){
-	this.srcX = 795; 
-	this.srcY = 653; 
+	this.srcX = 288; 
+	this.srcY = 647; 
 	this.width = 40; 
 	this.height = 24; 
 	this.drawX = 0; //draw at last squirrel update coors
@@ -589,9 +644,9 @@ Poof.prototype.draw = function(){
 **********************************************/
 
 function Bowtie(){
-	this.srcX = 719; 
-	this.srcY = 686; 
-	this.width = 24; 
+	this.srcX = 504; 
+	this.srcY = 647; 
+	this.width = 26; 
 	this.height = 24;
 	this.drawX = Math.floor(Math.random()*gameWidth) + 1;
 										//range of tightness	
@@ -660,26 +715,32 @@ function spawnBowties(number){
 }
 
 function drawAllBowties(){
-	
-	clear_ctx_bowtie(); 
 
-	var x = Math.floor((Math.random()*(bowties.length-1)));
+	/*for(var i = 0; i < number; i ++){
+		if(geek1.knightForm){
+			bowtie_amount = 5;
+
+		}
+		bowties[i] = new Bowtie(); 
+	}*/
+	clear_ctx_bowtie(); 
+	
+	var x = Math.floor((Math.random()*(bowties.length*3)));
 
 	for(var i = 0; i < bowties.length; i++){
 
 		// check for hit detection
 		checkHit(bowties[i],geek1);
 
-		if(geek1.knightForm == true){
-			bowties[i].srcX = 720;
-			bowties[i].srcY = 686;  
+		if(geek1.knightForm === true){
+			bowties[i].srcX = 504;  
 		}else{ 
 			if(geek1.score >= 500){
 		// if NOT knight && if knight head NOT spawned THEN SPAWN KNIGHT HEAD
 				if( i === x && !bowties[i].isHelmet){
-					bowties[i].srcX = 806;
-					bowties[i].srcY = 686;  
 					bowties[i].isHelmet = true;
+					bowties[2].srcX = 647;
+					console.log(bowties[i]);
 				}
 			}
 		}
@@ -702,8 +763,7 @@ function drawAllBowties(){
 			this.srcY; 
 			bowties[i].draw();
 		} 
-	}
-}
+	}}
 
 
 /**********************************************
@@ -738,10 +798,10 @@ function checkKeyDown(e){
 		geek1.isUpKey = true; 
 		e.preventDefault(); 
 	}
-	if(keyID === 40 || keyID === 83){//right
+	/*if(keyID === 40 || keyID === 83){//right
 		geek1.isDownKey = true; 
 		e.preventDefault(); 
-	}
+	}*/
 }
 
 function checkKeyUp (e){
@@ -763,10 +823,10 @@ function checkKeyUp (e){
 		geek1.isUpKey = false; 
 		e.preventDefault(); 
 	}
-	if(keyID === 40 || keyID === 83){//right
+	/*if(keyID === 40 || keyID === 83){//right
 		geek1.isDownKey = false; 
 		e.preventDefault(); 
-	}
+	}*/
 }
 
 
