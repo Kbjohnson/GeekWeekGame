@@ -20,6 +20,9 @@ var ctx_score = score.getContext('2d');
 var animTimer;
 var tid;
 
+var yVelocity = 0;
+var gravity = 1.2; 
+
 var gameWidth = 920;
 var gameHeight = 320; 
 var life_width = 81;
@@ -94,6 +97,17 @@ function loop(){
 		drawBg();
 		drawLogo();
 		moveBg();
+        
+        if(geek1.isJumping){
+            yVelocity += gravity;
+            geek1.bottomY += yVelocity;
+            if(geek1.bottomY > 310){
+                geek1.bottomY = 310;
+                yVelocity = 0;
+                geek1.isJumping = false;
+            }
+        }
+        
 		geek1.draw(); 
 		updateScore();
 		updateLives();
@@ -226,6 +240,10 @@ function updateScore(){
 		geek1.srcY = 864;
 		geek1.knightForm = false;
 		
+		for(var i = 0; i < bowtie_amount; i++){
+			bowties[i].isHelmet = false;
+		}
+		
 	}
 	if (geek1.score >5000){
 		ctx_score.fillText('Score:' + geek1.score, 825, 35);
@@ -340,6 +358,7 @@ function Geek(){
 	this.isRightKey = false;
 	this.score = 0; 
 	this.lives = 3; //lives -1 if hits a obstacle
+    this.isJumping = false; 
 
 	//hitbox coordinates 
 	this.leftX = this.drawX;
@@ -443,33 +462,39 @@ Geek.prototype.hitAction = function(){
 	
 Geek.prototype.jump = function() {
 	this.updateCoors();
-	if(this.bottomY == 310 && this.topY >= y_limit ){
-		this.isDownKey = true;
-		for(var i = 0; i < 125; i++){
- 			if(!geek1.knightForm){
- 				if(geek1.isRightKey === true){ 
- 					this.srcX = 144; //-> // 215 <- 
- 			 	}if(geek1.isLeftKey === true ){
- 			 		this.srcX = 215; 
- 			 	}else{
- 			 		this.srcX = 144; 
- 			 	}
- 				this.drawY -= 0.5; 
- 			}else{
- 				if(geek1.isRightKey ===  true){
- 					this.srcX = 144;//->  // 215 <- 
- 				}if(geek1.isLeftKey === true){
-					this.srcX = 215; 			
- 				}else{
- 					this.srcX = 144; 
- 				}
- 					this.drawY -= 0.5; 
- 			}
-		}
-	}
+    // if(this.bottomY == 310 && this.topY >= y_limit ){    
+        if(this.isJumping == false){
+            yVelocity = -15;
+            isJumping = true;
+            // this.isDownKey = true;  
+            // Sprite picture for the jump
+
+    		for(var i = 0; i < 125; i++){
+     			if(!geek1.knightForm){
+     				if(geek1.isRightKey === true){ 
+     					this.srcX = 144; //-> // 215 <- 
+     			 	}if(geek1.isLeftKey === true ){
+     			 		this.srcX = 215; 
+     			 	}else{
+     			 		this.srcX = 144; 
+     			 	}
+     				this.drawY -= 0.5; 
+     			}else{
+     				if(geek1.isRightKey ===  true){
+     					this.srcX = 144;//->  // 215 <- 
+     				}if(geek1.isLeftKey === true){
+    					this.srcX = 215; 			
+     				}else{
+     					this.srcX = 144; 
+     				}
+     					this.drawY -= 0.5; 
+     			}
+    		}
+            
+        }    
+            
+    // }
 };
-
-
 
 function clear_ctx_geek(){
 	ctx_geek.clearRect(0,0,gameWidth,gameHeight); 
