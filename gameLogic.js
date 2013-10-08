@@ -1,7 +1,7 @@
 /**********************************************
 			GLOBAL VARIABLES
 **********************************************/
-
+//Comment
 var canvas_Bg = document.getElementById('canvas_Bg');
 var ctx_Bg = canvas_Bg.getContext('2d'); 
 var logo = document.getElementById('logo');
